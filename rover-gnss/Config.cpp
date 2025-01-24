@@ -20,11 +20,11 @@ int publish_freq = 1000; // fréquence de publication des messages en millisecon
 bool mqtt_enabled = true; // MQTT est activé par défaut
 
 // NTRIP configuration
-char host[64] = "caster.centipede.fr";
+char host[64] = "crtk.net";
 int httpPort = 2101;
-char mntpnt[32] = "CT";
-char user[32] = "rover-gnss-tester";
-char passwd[32] = "";
+char mntpnt[32] = "NEAR";
+char user[32] = "c";
+char passwd[32] = "c";
 
 // Network configuration
 IPAddress server(192, 168, 1, 100);
@@ -56,12 +56,6 @@ NTRIPClient ntrip_c;
 WiFiUDP udp;
 BluetoothSerial SerialBT;
 HardwareSerial MySerial(1);
-HardwareSerial MySerial2(2);
-OneWire oneWire(ONE_WIRE_BUS);
-DallasTemperature sensors(&oneWire);
-DeviceAddress Thermometer;
-int deviceCount = 0;
-float temp = 0;
 unsigned long lastWifiReconnectAttempt = 0;
 unsigned long lastMqttReconnectAttempt = 0;
 unsigned long lastNtripReconnectAttempt = 0;
@@ -75,8 +69,6 @@ TinyGPSCustom gnssHDOP(gps, "GNGSA", 16);
 //wifi
 unsigned long lastAPCheckTime = 0;
 const unsigned long apCheckInterval = 120000; //check si wifi OK pendant wifi AP
-//distance
-float distance = 0 ;
 
 //Web
 void loadPreferences() {

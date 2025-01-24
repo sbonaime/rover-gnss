@@ -8,14 +8,6 @@ void setup() {
     delay(100);
     MySerial.begin(115200, SERIAL_8N1, PIN_RX, PIN_TX); //capteur GNSS
     delay(100);
-    MySerial2.begin(9600, SERIAL_8N1, PIN2_RX, PIN2_TX); //capteur Distance
-    delay(100);
-    digitalWrite(PIN2_RX, LOW); // capteur Distance outputs real-time value
-    delay(100);
-
-    sensors.begin();
-    locateDevices();
-    printDeviceAddresses();
 
     loadPreferences();
 
@@ -234,79 +226,8 @@ void callback(char* topic, byte* message, unsigned int length) {
     logMessage(LOG_LEVEL_INFO, "");
 }
 
-// Capteur
-void locateDevices() {
-    logMessage(LOG_LEVEL_INFO, "Locating devices...");
-    logMessage(LOG_LEVEL_INFO, "Found ", sensors.getDeviceCount());
-}
 
-void printAddress(DeviceAddress deviceAddress) {
-    for (uint8_t i = 0; i < 8; i++) {
-        Serial.print("0x");
-        if (deviceAddress[i] < 0x10) Serial.print("0");
-        Serial.print(deviceAddress[i], HEX);
-        if (i < 7) Serial.print(", ");
-    }
-    Serial.println("");
-}
 
-void printDeviceAddresses() {
-    logMessage(LOG_LEVEL_INFO, "Printing addresses...");
-    for (int i = 0; i < sensors.getDeviceCount(); i++) {
-        logMessage(LOG_LEVEL_INFO, "Sensor ", i + 1);
-        sensors.getAddress(Thermometer, i);
-        printAddress(Thermometer);
-    }
-}
-
-void readTemperatureSensors() {
-    sensors.requestTemperatures();
-    for (int i = 0; i < sensors.getDeviceCount(); i++) {
-        // logMessage(LOG_LEVEL_INFO, "Sensor ", i + 1);
-        temp = sensors.getTempCByIndex(i);
-        if (temp == DEVICE_DISCONNECTED_C) {
-            temp = 0; // Set temperature to 0 if no sensor is connected
-        }
-        // logMessage(LOG_LEVEL_INFO, " : ", temp, 2);
-        // logMessage(LOG_LEVEL_INFO, " °C");
-    }
-    logMessage(LOG_LEVEL_INFO, "");
-
-}
-
-void readUltrasonicSensor(void *parameter) {
-    while (true) {
-        unsigned char data[4] = {};
-        do {
-            for (int i = 0; i < 4; i++) {
-                data[i] = MySerial2.read();
-            }
-        } while (MySerial2.read() == 0xff);
-
-        MySerial2.flush();
-
-        if (data[0] == 0xff) {
-            int sum;
-            sum = (data[0] + data[1] + data[2]) & 0x00FF;
-            if (sum == data[3]) {
-                float new_distance = (data[1] << 8) + data[2];
-                if (new_distance > 280) {
-                    distance = new_distance / 10; // Mettre à jour la variable globale
-                    //Serial.print("distance=");
-                    //Serial.print(distance);
-                    //Serial.println("cm");
-                } else {
-                    //Serial.println("Below the lower limit");
-                    distance = 0;
-                }
-            } else {
-                logMessage(LOG_LEVEL_INFO, "ERROR distance");
-                distance = -1;
-            }
-        }
-        vTaskDelay(100 / portTICK_PERIOD_MS); // Adjust delay as needed
-    }
-}
 
 void handleNTRIPData() {
     if (xSemaphoreTake(xSemaphore, (TickType_t)10) == pdTRUE) {
