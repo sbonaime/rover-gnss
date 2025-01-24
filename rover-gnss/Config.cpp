@@ -4,8 +4,8 @@
 Preferences preferences;
 
 // WiFi configuration
-char ssid[64] = "ici";
-char password[64] = "12345678";
+char ssid[64] = "le_11";
+char password[64] = "Ks1gohPUTkwNFm8VxyVcHv5/wiiLBitl";
 
 // MQTT configuration
 char mqtt_server[64] = "mavi-mqtt.centipede.fr";
@@ -41,7 +41,7 @@ const int udpPort = 9999;
 #define UDP_SERVER 1
 #define TCP_SERVER 2
 #define MYSERIAL 3
-int transmition_mode = RS2323_MYSERIAL;
+int transmition_mode = MYSERIAL;
 
 // Timing intervals
 const unsigned long wifiReconnectInterval = 10000; // 10 seconds

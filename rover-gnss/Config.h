@@ -22,12 +22,8 @@
 #define LOG_LEVEL LOG_LEVEL_DEBUG
 
 // Pinouts
-#define PIN_TX 18  //esp32 
-#define PIN_RX 19 //esp32
-#define POWER_PIN 25
-#define ONE_WIRE_BUS 0 // capteur T°C
-#define PIN2_TX 16 
-#define PIN2_RX 17 // capteur Distancemètre
+#define PIN_TX 17  //esp32 
+#define PIN_RX 16 //esp32
 
 // WiFi configuration
 extern char ssid[64];
@@ -71,12 +67,6 @@ extern NTRIPClient ntrip_c;
 extern WiFiUDP udp;
 extern BluetoothSerial SerialBT;
 extern HardwareSerial MySerial;
-extern HardwareSerial MySerial2;
-extern OneWire oneWire;
-extern DallasTemperature sensors;
-extern DeviceAddress Thermometer;
-extern int deviceCount;
-extern float temp;
 extern unsigned long lastWifiReconnectAttempt;
 extern unsigned long lastMqttReconnectAttempt;
 extern unsigned long lastNtripReconnectAttempt;
@@ -100,7 +90,5 @@ extern unsigned long lastAPCheckTime;
 extern const unsigned long apCheckInterval;
 //MQTT option
 extern bool mqtt_enabled;
-//distance
-extern float distance;
 
 #endif // CONFIG_H
