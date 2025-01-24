@@ -3,6 +3,8 @@
 #include "Connectivity.h"
 #include <ESPmDNS.h>
 
+// Coolterm pour envoyer la configuration sur Mac
+
 void setup() {
     Serial.begin(115200);
     delay(100);
@@ -60,14 +62,6 @@ void setup() {
         NULL,              // Pas besoin de handle
         0                  // Épingler à l'autre cœur (esp32 a 2 cœurs, 0 et 1)
     );
-    // Création de la tâche FreeRTOS pour la lecture du distancemètre
-      xTaskCreate(
-      readUltrasonicSensor,    // Function that implements the task.
-      "ReadUltrasonicSensor",  // Text name for the task.
-      10000,                   // Stack size in words, not bytes.
-      NULL,                    // Parameter passed into the task.
-      1,                       // Priority at which the task is created.
-      NULL);                   // Task handle.
 
 }
 
@@ -170,16 +164,11 @@ void handleMQTTConnection() {
 }
 
 void publishMQTTData() {
-    if (mqtt_enabled && mqtt_client.connected() && gps.location.isValid() && gps.date.isValid() && gps.time.isValid() && gps.altitude.isValid() && gps.satellites.isValid()) {
         char timeBuffer[30];
         snprintf(timeBuffer, sizeof(timeBuffer), "%04d-%02d-%02d %02d:%02d:%02d,%02d",
                  gps.date.year(), gps.date.month(), gps.date.day(),
                  gps.time.hour(), gps.time.minute(), gps.time.second(),gps.time.centisecond());
 
-        float waterTemp = sensors.getTempCByIndex(0);
-        if (waterTemp == DEVICE_DISCONNECTED_C) {
-            waterTemp = 0; // Set temperature to 0 if no sensor is connected
-        }
         //transform NMEA geoid+alt to elevation
         float alt = gps.altitude.meters();
         float geoid_elev = atof(gnssGeoidElv.value());
@@ -195,10 +184,13 @@ void publishMQTTData() {
                       "\",\"fix\":\"" + String(gnssFixMode.value()) + //1.gps fix 2.dgps 4.RTK 5.Float
                       //"\",\"HDOP\":\"" + String(gnssHDOP.value(), 4) +
                       //"\",\"PDOP\":\"" + String(gnssPDOP.value(), 4) +
-                      "\",\"Temp\":\"" + String(waterTemp) +
-                      "\",\"Dist\":\"" + String(distance) +
-                      "\",\"Time\":\"" + String(timeBuffer) + "\"}";
+                      // "\",\"Temp\":\"" + String(waterTemp) +
+                      // "\",\"Dist\":\"" + String(distance) +
+                       "\",\"Time\":\"" + String(timeBuffer) + "\"}";
 
+    Serial.print(json);
+
+    if (mqtt_enabled && mqtt_client.connected() && gps.location.isValid() && gps.date.isValid() && gps.time.isValid() && gps.altitude.isValid() && gps.satellites.isValid()) {
         if (mqtt_client.publish(mqtt_output, json.c_str())) {
             logMessage(LOG_LEVEL_INFO, "Mqtt sent to : ", mqtt_output);
             logMessage(LOG_LEVEL_INFO, json.c_str());
@@ -324,7 +316,7 @@ void publishTask(void *parameter) {
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
 
         if (xSemaphoreTake(xSemaphore, (TickType_t)publish_freq ) == pdTRUE) {
-            readTemperatureSensors();
+            //readTemperatureSensors();
             publishMQTTData();
             xSemaphoreGive(xSemaphore);
         } else {
